@@ -66,7 +66,6 @@ static int write_full(int fd, const void *buffer, size_t size) {
     return 1;
 }
 
-/* Retorna 1 para um registro completo, 0 para EOF e -1 para erro/registro truncado. */
 static int read_pedido(int fd, Pedido *pedido) {
     char *cursor = (char *)pedido;
     size_t received = 0;
@@ -135,7 +134,6 @@ static void *cozinheiro(void *argument) {
         fflush(stdout);
         pthread_mutex_unlock(&fila->output_mutex);
 
-        /* O tempo de preparo varia de 250 ms a 800 ms. */
         pause_ms(250 + (pedido.id * 137L + args->id * 83L) % 551L);
 
         pthread_mutex_lock(&fila->output_mutex);
@@ -153,7 +151,7 @@ static int validar_pedido(Pedido pedido, int total) {
 }
 
 int main(int argc, char **argv) {
-    long total_long = 12;
+    long total_long = 20;
     long cozinheiros_long = 3;
     long capacidade_long = 4;
     if (argc > 4 ||
@@ -195,7 +193,6 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    /* O SIGPIPE do produtor vira erro de escrita caso o consumidor falhe. */
     signal(SIGPIPE, SIG_IGN);
     pid_t produtor = fork();
     if (produtor == -1) {
@@ -261,7 +258,6 @@ int main(int argc, char **argv) {
         close(pipe_fds[0]);
     }
 
-    /* Um registro sentinela encerra cada thread depois dos pedidos já enfileirados. */
     for (int i = 0; i < criadas; i++) {
         Pedido stop = {.id = 0, .item = 0, .is_stop = 1};
         if (!fila_inserir(&fila, stop)) sucesso = 0;
